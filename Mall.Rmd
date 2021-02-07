@@ -1,0 +1,268 @@
+---
+title: "Mall Case Study"
+author: "Rana Samir"
+date: "10/01/2021"
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+mall = read.csv("Mall_Customers.csv")
+```
+## Investigate the dataset
+
+```{r}
+summary(mall)
+```
+```{r}
+str(mall)
+```
+## Prepare the data for analysis
+
+```{r}
+# data preparation
+
+#Normalize data
+#normalize <- function(x) {return ((x - min(x)) / (max(x) - min(x)))}
+#mall$Age=normalize(mall$Age)
+#mall$Annual.Income..k..=normalize(mall$Annual.Income..k..)
+#mall$Spending.Score..1.100.= normalize(mall$Spending.Score..1.100.)
+#Remove unnecesser columns
+mall$CustomerID=NULL
+#Remove duplicates 
+mall=unique(mall)
+```
+# Hierarchical Clustering
+```{r}
+#Start the Hirearichal clustring 
+
+#Compute distance 
+distances= dist(mall[2:4], method="euclidean")
+clustermall= hclust(distances, method="ward.D")
+```
+## Plot The Dendogram
+``` {r echo = FALSE}
+#Plot the dendogram
+plot(clustermall)
+rect.hclust(clustermall, k = 6, border="red")
+```
+```{r}
+#Assign clusters 
+clustegroups= cutree(clustermall, k=6)
+#Invistigate the clusters 
+tapply(mall$Age, clustegroups, mean)
+tapply(mall$Annual.Income..k.., clustegroups, mean)
+tapply(mall$Spending.Score..1.100., clustegroups, mean)
+```
+### Cluster #1 charachterstics 
+```{r}
+G1 = subset(mall, clustegroups==1)
+G1
+```
+
+Show G1 summary 
+```{r}
+summary(G1)
+```
+```{r}
+table(G1$Gender)
+```
+Spending score is low
+
+Annual Income is average
+
+However, both spending score and annual income are small. 
+The mean value of age in this cluster is 45, however this cluster have a various ages in it resulting in a high range of ages within the cluster. 
+
+Females is two times more than males
+
+### Cluster #2 charachterstics
+```{r}
+G2 = subset(mall, clustegroups==2)
+G2
+```
+```{r}
+summary(G2)
+```
+
+
+```{r}
+table(G2$Gender)
+```
+Spending score is High
+
+Annual Income is average
+
+Howeever, both spending score and annual income are small. 
+The mean value of age in this cluster is between 25-35 age group.
+And females is more than 60% of the cluster
+
+### Cluster #3 charachterstics
+```{r}
+G3 = subset(mall, clustegroups==3)
+G3
+```
+```{r}
+summary(G3)
+```
+
+
+```{r}
+table(G3$Gender)
+```
+Spending score is Average
+
+Annual Income is relatively high
+
+This cluster have a low spending score relative to its annual income. 
+The mean value of age in this cluster is 25, however this cluster have a various ages in it resulting in a high range of ages within the cluster. 
+
+Females is two times more than males
+
+```{r}
+G4 = subset(mall, clustegroups==4)
+G4
+```
+
+
+```{r}
+summary(G4)
+```
+
+
+```{r}
+table(G4$Gender)
+```
+Spending score is Average
+
+Annual Income is above average
+
+This cluster have a low spending score relative to its annual income. 
+The mean value of age in this cluster is 25, however this cluster have a various ages in it resulting in a high range of ages within the cluster. 
+
+Females is slightly higher than males
+```{r}
+G5 = subset(mall, clustegroups==5)
+G5
+```
+```{r}
+summary(G5)
+```
+```{r}
+table(G5$Gender)
+```
+Spending score is high
+
+Annual Income is  high
+
+This cluster have a high spending score as well as high annual income 
+The mean value of age in this cluster is 32, with no high variability in the age range 
+
+Females to males ration is negligable 
+```{r}
+G6 = subset(mall, clustegroups==6)
+G6
+```
+```{r}
+summary(G6)
+```
+```{r}
+table(G6$Gender)
+```
+Spending score is low
+
+Annual Income is  high
+
+This cluster have a low spending score vs a annual income. 
+The mean value of age in this cluster is 41, however this cluster have a various ages in it resulting in a high range of ages within the cluster. 
+
+This is the only cluster that has males higher than femals. 
+
+# K-Means Clustring
+```{r}
+# Run k-means
+k=5
+set.seed(1)
+KMC = kmeans(mall[2:4], centers = k, iter.max = 1000)
+str(KMC)
+```
+```{r}
+MallClusters = KMC$cluster
+#Determine best number of clusters 
+KMC1 = kmeans(mall[2:4], centers = 2, iter.max = 1000)
+KMC2 = kmeans(mall[2:4], centers = 3, iter.max = 1000)
+KMC3 = kmeans(mall[2:4], centers = 4, iter.max = 1000)
+KMC4 = kmeans(mall[2:4], centers = 5, iter.max = 1000)
+KMC5 = kmeans(mall[2:4], centers = 6, iter.max = 1000)
+KMC6 = kmeans(mall[2:4], centers = 7, iter.max = 1000)
+KMC7 = kmeans(mall[2:4], centers = 8, iter.max = 1000)
+KMC8 = kmeans(mall[2:4], centers = 9, iter.max = 1000)
+KMC9 = kmeans(mall[2:4], centers = 10, iter.max = 1000)
+```
+
+
+### elbow method
+```{r echo = FALSE}
+NumClusters = seq(2,10,1)
+SumWithinss = c(sum(KMC1$withinss),sum(KMC2$withinss), sum(KMC3$withinss), sum(KMC4$withinss), sum(KMC5$withinss), sum(KMC6$withinss), sum(KMC7$withinss), sum(KMC8$withinss), sum(KMC9$withinss))
+plot(NumClusters, SumWithinss, type="b")
+```
+*5 is the best number of cluster*
+
+### Clusters
+```{r echo = FALSE}
+#Visualize the clusters 
+library(cluster)
+clusplot(mall, KMC4$cluster, 
+         lines = 0 , 
+         shade = TRUE,
+         color = TRUE,
+         labels = 2, 
+         plotchar = FALSE,
+         span = TRUE,
+         main = paste("Clusters of cleints"),
+         xlab="Annual Income",
+         ylab="Spending Score")
+
+```
+```{r}
+aggregate(mall, by=list(cluster=KMC4$cluster), mean)
+```
+```{r}
+KMC4$size
+```
+
+# Conclusion 
+
+**For the Hierarchical clustring** 
+
+Clusters 5,6 have the highest income. Clusters, 1,2 have the lowest income, and the other two clusters, 3,4 have an average income. 
+
+The spending score of these clusters is not proportional to their income. As the highest spending score clusters are 2,5, and the lowest spending score was given to people in cluster 6. 
+
+The notable trend in the data was that the high spending score was in the clusters of ages between 25-35 with a low variability within the cluster, like 2,5. The 40s age groups are all have a low spending score. 
+
+The gender of the customers didn't affect the spending score in general
+So the recommendation for a marketing team, in order to have more customer acquisitions, to make the main targeting to the clusters of low ages and average income and spending score in order to make them a high spending customers. So focus on clusters 3,4. Then Secondarly target clusters with high income but low spending score and a various age groups within such as cluster 6. 
+Cluser 1 was neglected from the targetting as it have a low income and also a high mean age within the cluster. Clusters 2,5 are already a loyal high spending customers that doesn't need an advertising ad especially for them and the rest of the targetting will work as a nice brand awerness for them.
+
+**For the K-Means clustring** 
+
+The results of the K-Means clustring wasn't very different from the Hierarchical clustring. 
+The most high spending cluster is 4, the least spending clusters are 3,5, and the last cluaters,1,2, have an average spending score. The trend deduced from the data are the same as the last one. the high spending score is associated with the younger age groups. and the 40s clusters have a low spending score. So the recomendation will be to target the clusters of the average spending and other than the 40s age, and target clusters with a high dispertion in age means. As mentioned the averge spending score clusers are 1,2 which have a mean age values of 25 and 54. 
+
+There were no big effect on the conclusion due to the change in the number of clusters between Hierarchical and k-means methods. Even in the number of recommended clusters to be targtted, there are no significant difference in the number of people in both clusters.  However, I think the 6 clusters will be more accurate in the targetting campigns. So the following recommendations will be based on the Hierarchical. 
+
+# Summary and Recommendation
+
+- Clusters 3,4 with average income and average spending score can be easily converge, so they should be targetted by advertising campaigns. 
+
+- Cluster 2 with low income but high spending score should be given a speical offers to make sure they stay loyal to the brand. 
+
+- Cluster 5 with the highest spending score and high income, should be targetted periodically, as they have more tendency to spend more in the brand. 
+
+- Cluster 1,6 have a low spending score although their distinct income values, they should be given a offers for free stuff to try the brands in order to make an acquisition.  
+
