@@ -6,3 +6,5 @@ Spending Score is something assigned to the customer based on the defined parame
 
 **Problem Statement**
 You own the mall and want to understand the customers like who can be easily converge so that the sense can be given to marketing team and plan the strategy accordingly.
+
+Data from: https://www.kaggle.com/vjchoudhary7/customer-segmentation-tutorial-in-python
